@@ -14,11 +14,11 @@
   "contributes": {
     "commands": [
       {
-        "command": "myi18ntools.helloWorld",
+        "command": "i18ntools.helloWorld",
         "title": "Hello World"
       },  {
         "command": "i18ntools.replaceSelectedTextInProject",
-        "title": "在整个项目中替换所选文字"
+        "title": "GlobalTextZMatchingReplacement"
     }
     ]
   },

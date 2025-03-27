@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
+import { getActivationFileInfo } from "./utils/judgeFile";
+import { json2Obj, toJSON } from "./utils/utils";
+import { ITextReplacement } from "./type/textReplacement";
+import { multipleReplacement } from "./globalTextReplacement";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "i18ntools" is now active!');
@@ -20,52 +24,27 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage("没有活动的编辑器");
         return;
       }
-
-      const selection = editor.selection;
-      const selectedText = editor.document.getText(selection);
-      if (!selectedText) {
-        vscode.window.showInformationMessage("没有选中任何文字");
+      const fillInfo = getActivationFileInfo();
+      if (fillInfo?.fileType !== "json") {
+        vscode.window.showInformationMessage("请选择json文件");
         return;
       }
 
-      const newText = await vscode.window.showInputBox({
-        prompt: "请输入要替换成的文字",
-        placeHolder: "输入新的文字",
-      });
-
-      if (!newText) {
-        return;
-      }
-
-      const workspaceFolders = vscode.workspace.workspaceFolders;
-      if (!workspaceFolders) {
-        vscode.window.showInformationMessage("没有打开工作区");
-        return;
-      }
-
-      const rootPath = workspaceFolders[0].uri.fsPath;
-
-      const searchFiles = (dir: string) => {
-        const files = fs.readdirSync(dir);
-        for (const file of files) {
-          const filePath = path.join(dir, file);
-          const stat = fs.statSync(filePath);
-          if (stat.isDirectory()) {
-            searchFiles(filePath);
-          } else {
-            const content = fs.readFileSync(filePath, "utf8");
-            if (content.includes(selectedText)) {
-              const newContent = content.replace(
-                new RegExp(selectedText, "g"),
-                newText
-              );
-              fs.writeFileSync(filePath, newContent, "utf8");
-            }
-          }
+      const object = json2Obj(fillInfo.fileContent);
+      const arr: ITextReplacement[] = [];
+      for (const key in object) {
+        if (Object.prototype.hasOwnProperty.call(object, key)) {
+          const keyArr = key.split(".");
+          const newHou = object[key].trim().replace(/\./g, "");
+          keyArr.pop();
+          const element = keyArr.join(".") + "." + newHou;
+          arr.push({
+            oldText: key,
+            newText: element,
+          });
         }
-      };
-
-      searchFiles(rootPath);
+      }
+      multipleReplacement(arr);
       vscode.window.showInformationMessage("替换完成");
     }
   );
