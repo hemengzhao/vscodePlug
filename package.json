@@ -19,7 +19,7 @@
       },  {
         "command": "i18ntools.replaceSelectedTextInProject",
         "title": "GlobalTextZMatchingReplacement"
-    }
+      }
     ]
   },
   "scripts": {

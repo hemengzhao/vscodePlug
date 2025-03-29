@@ -30,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
+      vscode.window.showInformationMessage("key只匹配更换中");
       const object = json2Obj(fillInfo.fileContent);
       const arr: ITextReplacement[] = [];
       for (const key in object) {
